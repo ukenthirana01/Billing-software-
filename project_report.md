@@ -809,3 +809,73 @@ As requested, in **Service mode** for Sales, Purchase, and Quotation:
 ### Benefit
 - Offline billing stays unchanged.
 - Update process becomes repeatable and low-risk with minimal manual steps.
+
+## Final Guide - GitHub Setup + Update Process + Feature Working (March 22, 2026)
+
+### Current Setup Status (Now)
+- Update system code has been implemented in app and backend.
+- GitHub workflow files have been added:
+  - `.github/workflows/release-build.yml`
+  - `.github/workflows/update-manifest.yml`
+- Manifest file is added:
+  - `latest.json`
+- App Settings now contains an **Updates** tab for manual check/download.
+- Repo URL used in app update defaults:
+  - `https://raw.githubusercontent.com/ukenthirana01/Billing-software-/main/latest.json`
+
+### One-Time Setup Steps (Do Now)
+1. Open terminal in project folder.
+2. Authenticate GitHub (required to push):
+   - `gh auth login`
+   - Or: `git config --global credential.helper manager`
+3. Push latest `main` code:
+   - `git push origin main`
+4. Open GitHub repository settings:
+   - Settings -> Actions -> General
+   - Set workflow permissions to allow write access to repository contents.
+
+### First Release Steps (Do Once To Start Update Cycle)
+1. Ensure `package.json` version is the release version (example: `1.0.1`).
+2. Create and push tag:
+   - `git tag v1.0.1`
+   - `git push origin v1.0.1`
+3. Wait for GitHub Actions to finish:
+   - **Build And Release Installer**
+   - **Update Latest Manifest**
+4. Verify outputs:
+   - GitHub Release contains installer `.exe` file.
+   - `latest.json` on `main` is auto-updated with new version + download URL.
+
+### Regular Update Steps (Every Future Version)
+1. Increase app version in `package.json`.
+2. Commit and push code to `main`.
+3. Create new tag (`vX.Y.Z`) and push tag.
+4. GitHub Actions auto-builds installer and updates `latest.json`.
+5. User checks update from app Settings -> Updates.
+
+### How Feature Works In Software
+- Billing/data operations are offline-first.
+- Internet is used only for update check/download.
+- In app:
+  1. Go to Settings -> Updates.
+  2. Confirm manifest URL.
+  3. Click **Check for Updates**.
+  4. If update available, click **Download Update**.
+  5. Install downloaded setup to update software.
+
+### Safety/Best Practices
+- Keep versions strictly increasing (`1.0.1` -> `1.0.2`).
+- Never reuse old tag names.
+- Keep one stable manifest URL always.
+- Test first update on one machine before sharing to all systems.
+- Take DB backup before installing updates.
+
+### Quick Troubleshooting
+- Push fails with credentials error:
+  - Run `gh auth login` and retry push.
+- Release created but no installer:
+  - Check workflow logs for build errors.
+- Update check works but no download:
+  - Confirm `latest.json` has valid `download_url`.
+- App says already latest unexpectedly:
+  - Confirm manifest `version` is higher than installed app version.
