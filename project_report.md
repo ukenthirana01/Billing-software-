@@ -922,3 +922,21 @@ As requested, in **Service mode** for Sales, Purchase, and Quotation:
 2. Create new tag (recommended `v1.0.2`) and push tag.
 3. Verify both workflows complete successfully.
 4. Confirm `latest.json` updates with new version and `download_url`.
+
+## CI Fix - Native Rebuild Dependency (Python) (March 22, 2026)
+
+### Diagnosed Cause
+- `electron-rebuild` failed for `better-sqlite3` because `node-gyp` could not find Python.
+- Error observed:
+  - `Could not find any Python installation to use`
+
+### Fix Applied
+- Updated `.github/workflows/release-build.yml` to include:
+  - `actions/setup-python@v5` (`python-version: 3.11`)
+  - npm Python path configuration before rebuild:
+    - `npm config set python "$env:pythonLocation\\python.exe"`
+- Native rebuild step retained:
+  - `npm run rebuild`
+
+### Expected Result
+- Tag-triggered build should now complete native module rebuild and produce installer `.exe` release asset.
