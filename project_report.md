@@ -879,3 +879,46 @@ As requested, in **Service mode** for Sales, Purchase, and Quotation:
   - Confirm `latest.json` has valid `download_url`.
 - App says already latest unexpectedly:
   - Confirm manifest `version` is higher than installed app version.
+
+## Push Error Resolution - GitHub 100MB Limit (March 22, 2026)
+
+### Problem
+- Push to GitHub failed because large file was present in git history:
+  - `node_modules/electron/dist/electron.exe` (>100MB)
+
+### Resolution Completed Locally
+- Created clean worktree branch from `origin/main`:
+  - branch: `clean-release-main`
+- Re-applied update automation commit and full project snapshot **without `node_modules`**.
+- Added proper root `.gitignore` (includes `node_modules/`, `dist/`, `build/`, `.vscode/`, `*.exe`, `.env`).
+- Clean branch history now excludes large binary issue.
+
+### Next Steps For User
+1. Authenticate GitHub credentials in terminal:
+   - `gh auth login`
+   - or `git config --global credential.helper manager`
+2. Push clean branch to main:
+   - `git -C .clean push origin clean-release-main:main`
+3. (Optional) Set local main to same clean history after successful push.
+
+### Why This Works
+- GitHub rejects any push containing >100MB blobs in history.
+- Clean branch is based on remote main and contains only required source + workflow files, not blocked binaries.
+
+## CI Fix - Release Build Failure On v1.0.1 (March 22, 2026)
+
+### Root Cause
+- GitHub Action `Build And Release Installer` failed at step:
+  - `Build Windows Installer`
+- As a result, no GitHub Release `.exe` asset was created, and `latest.json` remained at `1.0.0`.
+
+### Fix Applied
+- Updated workflow `.github/workflows/release-build.yml`:
+  - Added step: `npm run rebuild`
+  - This rebuilds native Electron modules (like `better-sqlite3`) before installer build.
+
+### Next Required User Action
+1. Push workflow fix commit to `main`.
+2. Create new tag (recommended `v1.0.2`) and push tag.
+3. Verify both workflows complete successfully.
+4. Confirm `latest.json` updates with new version and `download_url`.
