@@ -940,3 +940,18 @@ As requested, in **Service mode** for Sales, Purchase, and Quotation:
 
 ### Expected Result
 - Tag-triggered build should now complete native module rebuild and produce installer `.exe` release asset.
+
+## CI Fix - Python Path Step Failure On v1.0.3 (March 22, 2026)
+
+### Diagnosed Cause
+- Workflow step `Configure npm Python Path` failed on GitHub runner.
+- This stopped rebuild/build/release stages.
+
+### Fix Applied
+- Removed separate `npm config set python ...` step.
+- Set Python path directly as environment variable on rebuild step:
+  - `npm_config_python: ${{ env.pythonLocation }}\\python.exe`
+- Rebuild + installer build flow remains intact.
+
+### Next Release Trigger
+- Push this CI fix to `main` and publish next tag (`v1.0.4`).
