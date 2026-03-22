@@ -22,8 +22,16 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Setup Python (for node-gyp)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Dependencies
         run: npm ci
+
+      - name: Configure npm Python Path
+        run: npm config set python "$env:pythonLocation\\python.exe"
 
       - name: Rebuild Native Modules For Electron
         run: npm run rebuild
